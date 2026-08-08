@@ -2,6 +2,14 @@
 
 All notable changes follow semantic versioning.
 
+## 1.0.1 — 2026-08-08
+
+- Refresh the stable Python 3.14, uv, Bun, backend, and frontend dependency set.
+- Remove build tooling from the runtime image and fail CI on fixable High or
+  Critical container findings.
+- Record narrow VEX evidence for CPython fixes already present in 3.14.7.
+- Preserve all public and administrator API contracts from 1.0.0.
+
 ## 1.0.0 — 2026-08-08
 
 - Initial clean Tahr Desk release.

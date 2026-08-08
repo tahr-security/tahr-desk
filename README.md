@@ -6,7 +6,7 @@ an issue with optional photos, and privately follow its public timeline using an
 unguessable reference plus their email address. Staff triage, claim, classify,
 message, resolve, close, export, and audit cases from an authenticated workspace.
 
-Version `1.0.0:clean` is a focused single-tenant product. It has no payment,
+Version `1.0.1:clean` is a focused single-tenant product. It has no payment,
 mapping, reporter accounts, email/SMS delivery, paid service, deliberate
 vulnerability, hidden credential, or unsafe default.
 

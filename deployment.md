@@ -49,6 +49,6 @@ prestart retry, UIDs, hardening, and cleanup.
 
 Only then, and only after approval to consume the observed digest, add
 `catalog/desk.yaml` beside existing applications. Add only
-`desk:1.0.0:clean`; preserve every existing entry. Catalog merge,
+`desk:1.0.1:clean`; preserve every existing entry. Catalog merge,
 synchronization, deployment, and any Cloudflare, Convex, Linode, GitHub, or
 1Password mutation remain separately approved actions.

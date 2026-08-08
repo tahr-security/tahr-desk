@@ -124,6 +124,8 @@ test("dashboard, export worker, keyboard, and major pages are accessible", async
   await expect(page).toHaveURL(/#main-content$/)
   for (const path of ["/", "/services", "/report", "/track", "/login"]) {
     await page.goto(path)
+    await expect(page.locator("main")).toBeVisible()
+    await expect(page.locator("h1").first()).toBeVisible()
     const results = await new AxeBuilder({ page }).analyze()
     expect(results.violations, `${path} accessibility violations`).toEqual([])
   }

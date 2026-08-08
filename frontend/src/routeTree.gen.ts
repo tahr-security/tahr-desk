@@ -9,36 +9,36 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AdminRouteImport } from './routes/_admin'
+import { Route as PublicRouteImport } from './routes/_public'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
-import { Route as PublicTrackRouteImport } from './routes/_public/track'
 import { Route as PublicReportRouteImport } from './routes/_public/report'
-import { Route as PublicServicesIndexRouteImport } from './routes/_public/services.index'
+import { Route as PublicTrackRouteImport } from './routes/_public/track'
 import { Route as AdminAdminIndexRouteImport } from './routes/_admin/admin.index'
-import { Route as PublicServicesSlugRouteImport } from './routes/_public/services.$slug'
-import { Route as AdminAdminForbiddenRouteImport } from './routes/_admin/admin.forbidden'
-import { Route as AdminAdminExportsRouteImport } from './routes/_admin/admin.exports'
-import { Route as AdminAdminAgentsRouteImport } from './routes/_admin/admin.agents'
 import { Route as AdminAdminAccountRouteImport } from './routes/_admin/admin.account'
+import { Route as AdminAdminAgentsRouteImport } from './routes/_admin/admin.agents'
+import { Route as AdminAdminExportsRouteImport } from './routes/_admin/admin.exports'
+import { Route as AdminAdminForbiddenRouteImport } from './routes/_admin/admin.forbidden'
+import { Route as PublicServicesIndexRouteImport } from './routes/_public/services.index'
+import { Route as PublicServicesSlugRouteImport } from './routes/_public/services.$slug'
 import { Route as AdminAdminCasesIndexRouteImport } from './routes/_admin/admin.cases.index'
-import { Route as AdminAdminSettingsWebhooksRouteImport } from './routes/_admin/admin.settings.webhooks'
-import { Route as AdminAdminSettingsServicesRouteImport } from './routes/_admin/admin.settings.services'
-import { Route as AdminAdminSettingsGeneralRouteImport } from './routes/_admin/admin.settings.general'
 import { Route as AdminAdminCasesCaseIdRouteImport } from './routes/_admin/admin.cases.$caseId'
+import { Route as AdminAdminSettingsGeneralRouteImport } from './routes/_admin/admin.settings.general'
+import { Route as AdminAdminSettingsServicesRouteImport } from './routes/_admin/admin.settings.services'
+import { Route as AdminAdminSettingsWebhooksRouteImport } from './routes/_admin/admin.settings.webhooks'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const AdminRoute = AdminRouteImport.update({
+  id: '/_admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/_admin',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
@@ -46,19 +46,14 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PublicRoute,
 } as any)
-const PublicTrackRoute = PublicTrackRouteImport.update({
-  id: '/track',
-  path: '/track',
-  getParentRoute: () => PublicRoute,
-} as any)
 const PublicReportRoute = PublicReportRouteImport.update({
   id: '/report',
   path: '/report',
   getParentRoute: () => PublicRoute,
 } as any)
-const PublicServicesIndexRoute = PublicServicesIndexRouteImport.update({
-  id: '/services/',
-  path: '/services/',
+const PublicTrackRoute = PublicTrackRouteImport.update({
+  id: '/track',
+  path: '/track',
   getParentRoute: () => PublicRoute,
 } as any)
 const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
@@ -66,19 +61,9 @@ const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AdminRoute,
 } as any)
-const PublicServicesSlugRoute = PublicServicesSlugRouteImport.update({
-  id: '/services/$slug',
-  path: '/services/$slug',
-  getParentRoute: () => PublicRoute,
-} as any)
-const AdminAdminForbiddenRoute = AdminAdminForbiddenRouteImport.update({
-  id: '/admin/forbidden',
-  path: '/admin/forbidden',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminAdminExportsRoute = AdminAdminExportsRouteImport.update({
-  id: '/admin/exports',
-  path: '/admin/exports',
+const AdminAdminAccountRoute = AdminAdminAccountRouteImport.update({
+  id: '/admin/account',
+  path: '/admin/account',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAdminAgentsRoute = AdminAdminAgentsRouteImport.update({
@@ -86,20 +71,40 @@ const AdminAdminAgentsRoute = AdminAdminAgentsRouteImport.update({
   path: '/admin/agents',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAdminAccountRoute = AdminAdminAccountRouteImport.update({
-  id: '/admin/account',
-  path: '/admin/account',
+const AdminAdminExportsRoute = AdminAdminExportsRouteImport.update({
+  id: '/admin/exports',
+  path: '/admin/exports',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminForbiddenRoute = AdminAdminForbiddenRouteImport.update({
+  id: '/admin/forbidden',
+  path: '/admin/forbidden',
+  getParentRoute: () => AdminRoute,
+} as any)
+const PublicServicesIndexRoute = PublicServicesIndexRouteImport.update({
+  id: '/services/',
+  path: '/services/',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicServicesSlugRoute = PublicServicesSlugRouteImport.update({
+  id: '/services/$slug',
+  path: '/services/$slug',
+  getParentRoute: () => PublicRoute,
 } as any)
 const AdminAdminCasesIndexRoute = AdminAdminCasesIndexRouteImport.update({
   id: '/admin/cases/',
   path: '/admin/cases/',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAdminSettingsWebhooksRoute =
-  AdminAdminSettingsWebhooksRouteImport.update({
-    id: '/admin/settings/webhooks',
-    path: '/admin/settings/webhooks',
+const AdminAdminCasesCaseIdRoute = AdminAdminCasesCaseIdRouteImport.update({
+  id: '/admin/cases/$caseId',
+  path: '/admin/cases/$caseId',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminSettingsGeneralRoute =
+  AdminAdminSettingsGeneralRouteImport.update({
+    id: '/admin/settings/general',
+    path: '/admin/settings/general',
     getParentRoute: () => AdminRoute,
   } as any)
 const AdminAdminSettingsServicesRoute =
@@ -108,17 +113,12 @@ const AdminAdminSettingsServicesRoute =
     path: '/admin/settings/services',
     getParentRoute: () => AdminRoute,
   } as any)
-const AdminAdminSettingsGeneralRoute =
-  AdminAdminSettingsGeneralRouteImport.update({
-    id: '/admin/settings/general',
-    path: '/admin/settings/general',
+const AdminAdminSettingsWebhooksRoute =
+  AdminAdminSettingsWebhooksRouteImport.update({
+    id: '/admin/settings/webhooks',
+    path: '/admin/settings/webhooks',
     getParentRoute: () => AdminRoute,
   } as any)
-const AdminAdminCasesCaseIdRoute = AdminAdminCasesCaseIdRouteImport.update({
-  id: '/admin/cases/$caseId',
-  path: '/admin/cases/$caseId',
-  getParentRoute: () => AdminRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -244,11 +244,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/_admin': {
+      id: '/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public': {
@@ -258,11 +258,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_admin': {
-      id: '/_admin'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AdminRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public/': {
@@ -272,13 +272,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
     }
-    '/_public/track': {
-      id: '/_public/track'
-      path: '/track'
-      fullPath: '/track'
-      preLoaderRoute: typeof PublicTrackRouteImport
-      parentRoute: typeof PublicRoute
-    }
     '/_public/report': {
       id: '/_public/report'
       path: '/report'
@@ -286,11 +279,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicReportRouteImport
       parentRoute: typeof PublicRoute
     }
-    '/_public/services/': {
-      id: '/_public/services/'
-      path: '/services'
-      fullPath: '/services/'
-      preLoaderRoute: typeof PublicServicesIndexRouteImport
+    '/_public/track': {
+      id: '/_public/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof PublicTrackRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_admin/admin/': {
@@ -300,25 +293,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_public/services/$slug': {
-      id: '/_public/services/$slug'
-      path: '/services/$slug'
-      fullPath: '/services/$slug'
-      preLoaderRoute: typeof PublicServicesSlugRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/_admin/admin/forbidden': {
-      id: '/_admin/admin/forbidden'
-      path: '/admin/forbidden'
-      fullPath: '/admin/forbidden'
-      preLoaderRoute: typeof AdminAdminForbiddenRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/_admin/admin/exports': {
-      id: '/_admin/admin/exports'
-      path: '/admin/exports'
-      fullPath: '/admin/exports'
-      preLoaderRoute: typeof AdminAdminExportsRouteImport
+    '/_admin/admin/account': {
+      id: '/_admin/admin/account'
+      path: '/admin/account'
+      fullPath: '/admin/account'
+      preLoaderRoute: typeof AdminAdminAccountRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/admin/agents': {
@@ -328,12 +307,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminAgentsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/admin/account': {
-      id: '/_admin/admin/account'
-      path: '/admin/account'
-      fullPath: '/admin/account'
-      preLoaderRoute: typeof AdminAdminAccountRouteImport
+    '/_admin/admin/exports': {
+      id: '/_admin/admin/exports'
+      path: '/admin/exports'
+      fullPath: '/admin/exports'
+      preLoaderRoute: typeof AdminAdminExportsRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/forbidden': {
+      id: '/_admin/admin/forbidden'
+      path: '/admin/forbidden'
+      fullPath: '/admin/forbidden'
+      preLoaderRoute: typeof AdminAdminForbiddenRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_public/services/': {
+      id: '/_public/services/'
+      path: '/services'
+      fullPath: '/services/'
+      preLoaderRoute: typeof PublicServicesIndexRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/services/$slug': {
+      id: '/_public/services/$slug'
+      path: '/services/$slug'
+      fullPath: '/services/$slug'
+      preLoaderRoute: typeof PublicServicesSlugRouteImport
+      parentRoute: typeof PublicRoute
     }
     '/_admin/admin/cases/': {
       id: '/_admin/admin/cases/'
@@ -342,18 +342,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminCasesIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/admin/settings/webhooks': {
-      id: '/_admin/admin/settings/webhooks'
-      path: '/admin/settings/webhooks'
-      fullPath: '/admin/settings/webhooks'
-      preLoaderRoute: typeof AdminAdminSettingsWebhooksRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/_admin/admin/settings/services': {
-      id: '/_admin/admin/settings/services'
-      path: '/admin/settings/services'
-      fullPath: '/admin/settings/services'
-      preLoaderRoute: typeof AdminAdminSettingsServicesRouteImport
+    '/_admin/admin/cases/$caseId': {
+      id: '/_admin/admin/cases/$caseId'
+      path: '/admin/cases/$caseId'
+      fullPath: '/admin/cases/$caseId'
+      preLoaderRoute: typeof AdminAdminCasesCaseIdRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/admin/settings/general': {
@@ -363,11 +356,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminSettingsGeneralRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/admin/cases/$caseId': {
-      id: '/_admin/admin/cases/$caseId'
-      path: '/admin/cases/$caseId'
-      fullPath: '/admin/cases/$caseId'
-      preLoaderRoute: typeof AdminAdminCasesCaseIdRouteImport
+    '/_admin/admin/settings/services': {
+      id: '/_admin/admin/settings/services'
+      path: '/admin/settings/services'
+      fullPath: '/admin/settings/services'
+      preLoaderRoute: typeof AdminAdminSettingsServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/settings/webhooks': {
+      id: '/_admin/admin/settings/webhooks'
+      path: '/admin/settings/webhooks'
+      fullPath: '/admin/settings/webhooks'
+      preLoaderRoute: typeof AdminAdminSettingsWebhooksRouteImport
       parentRoute: typeof AdminRoute
     }
   }
