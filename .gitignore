@@ -1,1 +1,54 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+
+# Python
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.coverage
+coverage.xml
+backend/coverage/
+backend/htmlcov/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ty/
+
+# JavaScript and frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+backend/app/frontend/
+frontend/playwright/.auth/
+frontend/playwright-report/
+frontend/test-results/
+frontend/blob-report/
+playwright-report/
+test-results/
+blob-report/
+
+# Local data and generated security artifacts
+*.db
+*.sqlite
+*.sqlite3
+*.log
+*.sarif
+*sbom*.json
+*sbom*.spdx
+*sbom*.spdx.json
+image-metadata.json
+
+# Editors and operating systems
 .DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json

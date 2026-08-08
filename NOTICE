@@ -1,0 +1,15 @@
+Tahr Desk
+Copyright (c) 2026 Tahr Security
+
+This project is derived from Full Stack FastAPI Template by Sebastián Ramírez,
+pinned at commit d506ea4883c0f7bfcf5280921cfc407c46808711:
+https://github.com/fastapi/full-stack-fastapi-template
+
+The upstream project is distributed under the MIT License. Its copyright notice
+is preserved in LICENSE.
+
+The bundled Public Sans variable typeface is copyright 2015 The Public Sans
+Project Authors and distributed under the SIL Open Font License 1.1. Its license
+is preserved in frontend/public/PublicSans-LICENSE.txt.
+
+Lucide icons are supplied by the lucide-react dependency under the ISC License.

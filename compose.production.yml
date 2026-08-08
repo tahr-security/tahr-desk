@@ -1,0 +1,121 @@
+name: tahr-desk
+
+x-application-environment: &application-environment
+  ENVIRONMENT: ${ENVIRONMENT:-production}
+  PROJECT_NAME: ${PROJECT_NAME:-Tahr Desk}
+  FRONTEND_HOST: ${FRONTEND_HOST:-http://localhost:8000}
+  BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:8000}
+  SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
+  FIRST_SUPERUSER: ${FIRST_SUPERUSER:-wardenn-admin@tahr.ca}
+  FIRST_SUPERUSER_PASSWORD: ${FIRST_SUPERUSER_PASSWORD:?Set FIRST_SUPERUSER_PASSWORD in .env}
+  POSTGRES_SERVER: db
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: ${POSTGRES_DB:-tahr_desk}
+  POSTGRES_USER: ${POSTGRES_USER:-tahr_desk}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+  DATA_ROOT: /app/data
+  WEBHOOK_DELIVERY_ENABLED: ${WEBHOOK_DELIVERY_ENABLED:-false}
+  WEBHOOK_ALLOW_HTTP: "false"
+
+x-application-security: &application-security
+  user: "10001:10001"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  init: true
+
+x-application-base: &application-base
+  image: ${TAHR_DESK_IMAGE:?Set TAHR_DESK_IMAGE to an exact image reference or tahr-desk:local}
+  <<: *application-security
+  environment: *application-environment
+  volumes:
+    - desk_app_data:/app/data
+  networks: [target]
+
+services:
+  db:
+    image: postgres@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636
+    restart: unless-stopped
+    user: "999:999"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tahr_desk}
+      POSTGRES_USER: ${POSTGRES_USER:-tahr_desk}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=32m,uid=999,gid=999
+      - /run/postgresql:rw,noexec,nosuid,nodev,size=16m,uid=999,gid=999
+    volumes:
+      - desk_postgres_data:/var/lib/postgresql
+    networks: [target]
+
+  prestart:
+    <<: *application-base
+    command: [bash, scripts/prestart.sh]
+    restart: "no"
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,uid=10001,gid=10001
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    <<: *application-base
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,uid=10001,gid=10001
+    depends_on:
+      db:
+        condition: service_healthy
+      prestart:
+        condition: service_completed_successfully
+    ports:
+      - ${APP_BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-8000}:8000
+
+  worker:
+    <<: *application-base
+    command: [python, -m, app.worker]
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          from sqlalchemy import text; from app.core.config import settings; from
+          app.core.db import engine; connection = engine.connect();
+          connection.execute(text('SELECT 1')); connection.close(); assert
+          (settings.DATA_ROOT / 'uploads').is_dir(); assert (settings.DATA_ROOT /
+          'exports').is_dir()
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=128m,uid=10001,gid=10001
+    depends_on:
+      db:
+        condition: service_healthy
+      prestart:
+        condition: service_completed_successfully
+
+volumes:
+  desk_postgres_data:
+    name: ${POSTGRES_VOLUME:-tahr-desk-postgres}
+  desk_app_data:
+    name: ${APP_DATA_VOLUME:-tahr-desk-data}
+
+networks:
+  target:
+    name: ${TAHR_DESK_NETWORK:-tahr-desk}

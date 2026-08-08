@@ -1,0 +1,329 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ENVIRONMENT: local
+  PROJECT_NAME: Tahr Desk
+  FRONTEND_HOST: http://localhost:8000
+  BACKEND_CORS_ORIGINS: http://localhost:8000
+  FIRST_SUPERUSER: wardenn-admin@tahr.ca
+  POSTGRES_DB: tahr_desk_test
+  POSTGRES_USER: tahr_desk
+  DATA_ROOT: /tmp/tahr-desk-ci-data
+  WEBHOOK_DELIVERY_ENABLED: "false"
+  TAHR_DESK_IMAGE: tahr-desk:ci
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      POSTGRES_SERVER: localhost
+      POSTGRES_PORT: "5432"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Generate ephemeral test secrets and start PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          secret_key="$(openssl rand -hex 48)"
+          admin_password="$(openssl rand -base64 36 | tr -d '\n')"
+          database_password="$(openssl rand -base64 36 | tr -d '\n')"
+          for value in "$secret_key" "$admin_password" "$database_password"; do
+            echo "::add-mask::$value"
+          done
+          echo "SECRET_KEY=$secret_key" >> "$GITHUB_ENV"
+          echo "FIRST_SUPERUSER_PASSWORD=$admin_password" >> "$GITHUB_ENV"
+          echo "POSTGRES_PASSWORD=$database_password" >> "$GITHUB_ENV"
+          docker run --rm -d --name tahr-desk-ci-postgres \
+            -e POSTGRES_DB="$POSTGRES_DB" \
+            -e POSTGRES_USER="$POSTGRES_USER" \
+            -e POSTGRES_PASSWORD="$database_password" \
+            -p 127.0.0.1:5432:5432 \
+            postgres@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636
+          for attempt in {1..30}; do
+            docker exec tahr-desk-ci-postgres pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .python-version
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.11.18"
+          cache-dependency-glob: uv.lock
+      - name: Install locked dependencies
+        run: uv sync --frozen --all-packages
+      - name: Verify migration round trip
+        working-directory: backend
+        run: |
+          uv run alembic upgrade head
+          uv run alembic downgrade base
+          uv run alembic upgrade head
+      - name: Seed database
+        working-directory: backend
+        run: uv run python app/initial_data.py
+      - name: Lint and type-check backend
+        working-directory: backend
+        run: uv run bash scripts/lint.sh
+      - name: Test backend
+        working-directory: backend
+        run: |
+          uv run coverage run -m pytest tests
+          uv run coverage report --fail-under=90
+      - name: Stop PostgreSQL
+        if: always()
+        run: docker stop tahr-desk-ci-postgres || true
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.12
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Lint frontend
+        working-directory: frontend
+        run: bunx biome check --no-errors-on-unmatched --files-ignore-unknown=true ./
+      - name: Test frontend domain modules
+        working-directory: frontend
+        run: bun run test:unit
+      - name: Type-check and build frontend
+        working-directory: frontend
+        run: bun run build
+
+  generated-client:
+    name: Generated API client
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      POSTGRES_SERVER: localhost
+      POSTGRES_PORT: "5432"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .python-version
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.11.18"
+          cache-dependency-glob: uv.lock
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.12
+      - name: Install locked dependencies
+        run: |
+          uv sync --frozen --all-packages
+          bun install --frozen-lockfile
+      - name: Generate ephemeral schema settings
+        shell: bash
+        run: |
+          secret_key="$(openssl rand -hex 48)"
+          admin_password="$(openssl rand -base64 36 | tr -d '\n')"
+          echo "::add-mask::$secret_key"
+          echo "::add-mask::$admin_password"
+          echo "SECRET_KEY=$secret_key" >> "$GITHUB_ENV"
+          echo "FIRST_SUPERUSER_PASSWORD=$admin_password" >> "$GITHUB_ENV"
+      - name: Regenerate OpenAPI client
+        run: bun run generate-client
+      - name: Check generated files are current
+        run: git diff --exit-code -- frontend/openapi.json frontend/src/client
+
+  supply-chain:
+    name: Supply-chain review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .python-version
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.11.18"
+          cache-dependency-glob: uv.lock
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.12
+      - name: Install locked dependencies
+        run: |
+          uv sync --frozen --all-packages
+          bun install --frozen-lockfile
+      - name: Lint workflows
+        run: uv run zizmor .github/workflows
+      - name: Verify secret-scan baseline
+        shell: bash
+        run: |
+          uv run detect-secrets scan \
+            --all-files \
+            --exclude-files '(^|/)(\.git|node_modules|\.venv|\.ruff_cache|\.mypy_cache|\.pytest_cache|\.secrets\.baseline|uv\.lock|bun\.lock|frontend/openapi\.json|frontend/src/client|frontend/dist|backend/app/frontend|backend/htmlcov|backend/coverage|frontend/playwright-report|test-results)(/|$)' \
+            > /tmp/current-secrets.baseline
+          jq --sort-keys 'del(.generated_at)' .secrets.baseline > /tmp/expected-secrets.json
+          jq --sort-keys 'del(.generated_at)' /tmp/current-secrets.baseline > /tmp/current-secrets.json
+          diff --unified /tmp/expected-secrets.json /tmp/current-secrets.json
+      - name: Build dependency licence reports
+        shell: bash
+        run: |
+          mkdir -p audit-reports
+          uv run pip-licenses \
+            --format=json \
+            --output-file=audit-reports/python-licenses.json
+          bunx license-checker-rseidelsohn \
+            --start . \
+            --json > audit-reports/frontend-licenses.json
+          jq -e '[.[] | select((.License // "") | ascii_downcase | contains("unknown"))] | length == 0' \
+            audit-reports/python-licenses.json
+          jq -e '[to_entries[] | select(.value.private != true) | select((.value.licenses // "") | test("unknown|unlicensed"; "i"))] | length == 0' \
+            audit-reports/frontend-licenses.json
+      - name: Upload dependency licence reports
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dependency-licences
+          path: audit-reports
+          retention-days: 30
+
+  browser-and-container:
+    name: Browser and container
+    needs: [backend, frontend, generated-client, supply-chain]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.12
+      - name: Install frontend and Chromium
+        run: |
+          bun install --frozen-lockfile
+          cd frontend
+          bunx playwright install --with-deps chromium
+      - name: Generate ephemeral runtime secrets
+        shell: bash
+        run: |
+          secret_key="$(openssl rand -hex 48)"
+          admin_password="$(openssl rand -base64 36 | tr -d '\n')"
+          database_password="$(openssl rand -base64 36 | tr -d '\n')"
+          for value in "$secret_key" "$admin_password" "$database_password"; do
+            echo "::add-mask::$value"
+          done
+          echo "SECRET_KEY=$secret_key" >> "$GITHUB_ENV"
+          echo "FIRST_SUPERUSER_PASSWORD=$admin_password" >> "$GITHUB_ENV"
+          echo "POSTGRES_PASSWORD=$database_password" >> "$GITHUB_ENV"
+      - name: Build hardened image
+        run: docker compose -f compose.production.yml build app
+      - name: Scan hardened image
+        id: image-scan
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
+        with:
+          image: ${{ env.TAHR_DESK_IMAGE }}
+          fail-build: false
+          output-format: json
+          output-file: image-vulnerability-report.json
+      - name: Summarize image scan
+        shell: bash
+        run: |
+          total="$(jq '.matches | length' image-vulnerability-report.json)"
+          critical="$(jq '[.matches[] | select(.vulnerability.severity == "Critical")] | length' image-vulnerability-report.json)"
+          high="$(jq '[.matches[] | select(.vulnerability.severity == "High")] | length' image-vulnerability-report.json)"
+          {
+            echo "### Container vulnerability scan"
+            echo
+            echo "Matches: $total"
+            echo "Critical: $critical"
+            echo "High: $high"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload image scan report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: image-vulnerability-report
+          path: image-vulnerability-report.json
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Start stack
+        run: docker compose -f compose.production.yml up -d --wait
+      - name: Smoke test runtime constraints
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:8000/
+          curl --fail --silent --show-error http://127.0.0.1:8000/api/v1/utils/health-check/
+          test "$(docker compose -f compose.production.yml exec -T app id -u)" = "10001"
+          test "$(docker image inspect -f '{{.Architecture}}' "$TAHR_DESK_IMAGE")" = "amd64"
+          ! docker compose -f compose.production.yml exec -T app touch /app/read-only-check
+          docker compose -f compose.production.yml exec -T app sh -c 'touch /tmp/write-check && rm /tmp/write-check'
+          test "$(docker compose -f compose.production.yml exec -T worker id -u)" = "10001"
+          for service in app prestart worker db; do
+            container="$(docker compose -f compose.production.yml ps -aq "$service")"
+            test "$(docker inspect -f '{{.HostConfig.ReadonlyRootfs}}' "$container")" = "true"
+            test "$(docker inspect -f '{{json .HostConfig.SecurityOpt}}' "$container")" = '["no-new-privileges:true"]'
+            test "$(docker inspect -f '{{json .HostConfig.CapDrop}}' "$container")" = '["ALL"]'
+            test "$(docker inspect -f '{{json .HostConfig.Tmpfs}}' "$container")" != '{}'
+          done
+          test -z "$(docker port "$(docker compose -f compose.production.yml ps -q db)")"
+      - name: Test browser journeys
+        working-directory: frontend
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:8000
+        run: bunx playwright test
+      - name: Verify restart persistence
+        run: |
+          docker compose -f compose.production.yml restart db app
+          docker compose -f compose.production.yml up -d --wait app
+          curl --fail --silent --show-error http://127.0.0.1:8000/api/v1/utils/health-check/
+      - name: Upload browser report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Show container logs
+        if: failure()
+        run: docker compose -f compose.production.yml logs --no-color
+      - name: Stop stack
+        if: always()
+        run: docker compose -f compose.production.yml down --volumes --remove-orphans
