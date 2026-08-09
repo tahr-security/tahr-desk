@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Python 3.14, uv 0.11.18, Bun 1.3.12, and PostgreSQL 18 (or Docker Compose v2)
+Python 3.14, uv 0.12.2, Bun 1.3.14, and PostgreSQL 18 (or Docker Compose v2)
 are the pinned development foundation. Copy `.env.example` to `.env`, use
 `ENVIRONMENT=local`, set `POSTGRES_SERVER=localhost` for a host backend, and
 replace every secret placeholder.

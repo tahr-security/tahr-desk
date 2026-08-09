@@ -23,6 +23,12 @@ updates:
     groups:
       frontend:
         patterns: ["*"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      # The 0.x generator line requires an explicit client migration.
+      - dependency-name: "@hey-api/openapi-ts"
+        versions: [">= 0.98.0"]
 
   - package-ecosystem: docker
     directory: /backend
@@ -31,6 +37,12 @@ updates:
     groups:
       container:
         patterns: ["*"]
+    ignore:
+      # Keep production on the supported stable Python 3.14 line.
+      - dependency-name: python
+        update-types: ["version-update:semver-major"]
+      - dependency-name: python
+        versions: [">= 3.15"]
 
   - package-ecosystem: docker-compose
     directory: /

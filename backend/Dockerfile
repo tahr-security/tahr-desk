@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM oven/bun:1.3.12-alpine@sha256:26d8996560ca94eab9ce48afc0c7443825553c9a851f40ae574d47d20906826d AS frontend-build
+FROM oven/bun:1.3.14-alpine@sha256:5acc90a93e91ff07bf72aa90a7c9f0fa189765aec90b47bdbf2152d2196383c0 AS frontend-build
 
 WORKDIR /src
 
@@ -16,10 +16,30 @@ ENV VITE_API_URL=${VITE_API_URL}
 RUN bun run build
 
 
-FROM ghcr.io/astral-sh/uv:0.11.18@sha256:78bc42400d77b0678ba95765305c826652ed5431f399257271dda681d0318f03 AS uv
+FROM ghcr.io/astral-sh/uv:0.12.2@sha256:069a51314a7bb6031777a9273205fe1b0b19e914ef418207d1338b268df641dd AS uv
 
 
-FROM python:3.14.3-slim-bookworm@sha256:f21c0d5a44c56805654c15abccc1b2fd576c8d93aca0a3f74b4aba2dc92510e2 AS runtime
+FROM python:3.14.7-slim-bookworm@sha256:23c59390fc717bf09f9336908199a0ae75d9c4264bf296123f94ad772fea3b52 AS backend-build
+
+ENV UV_CACHE_DIR=/tmp/uv-cache \
+    UV_COMPILE_BYTECODE=0 \
+    UV_LINK_MODE=copy
+
+COPY --from=uv /uv /uvx /usr/local/bin/
+
+WORKDIR /app
+
+COPY pyproject.toml uv.lock ./
+COPY backend/pyproject.toml backend/alembic.ini backend/
+COPY backend/app backend/app
+COPY backend/scripts backend/scripts
+COPY --from=frontend-build /src/backend/app/frontend backend/app/frontend
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --package tahr-desk
+
+
+FROM python:3.14.7-slim-bookworm@sha256:23c59390fc717bf09f9336908199a0ae75d9c4264bf296123f94ad772fea3b52 AS runtime
 
 ARG APP_UID=10001
 ARG APP_GID=10001
@@ -28,31 +48,17 @@ ENV HOME=/tmp \
     PATH=/app/.venv/bin:${PATH} \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    UV_CACHE_DIR=/tmp/uv-cache \
-    UV_COMPILE_BYTECODE=0 \
-    UV_LINK_MODE=copy \
     XDG_CACHE_HOME=/tmp/cache
-
-COPY --from=uv /uv /uvx /usr/local/bin/
 
 WORKDIR /app
 
-COPY pyproject.toml uv.lock ./
-COPY backend/pyproject.toml backend/alembic.ini backend/
+COPY --from=backend-build /app/.venv /app/.venv
+COPY --from=backend-build /app/backend /app/backend
 
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --package tahr-desk --no-install-package tahr-desk
-
-COPY backend/app backend/app
-COPY backend/scripts backend/scripts
-COPY --from=frontend-build /src/backend/app/frontend backend/app/frontend
-
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --package tahr-desk \
-    && groupadd --gid "${APP_GID}" app \
+RUN groupadd --gid "${APP_GID}" app \
     && useradd --uid "${APP_UID}" --gid "${APP_GID}" --no-create-home --home-dir /tmp --shell /usr/sbin/nologin app \
     && mkdir -p /app/data/uploads /app/data/exports \
-    && chown -R "${APP_UID}:${APP_GID}" /app
+    && chown -R "${APP_UID}:${APP_GID}" /app/data
 
 WORKDIR /app/backend
 

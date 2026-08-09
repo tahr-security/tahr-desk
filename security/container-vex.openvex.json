@@ -1,0 +1,61 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://github.com/tahr-security/tahr-desk/security/container-vex/1.0.1",
+  "author": "Tahr Security",
+  "role": "Document Creator",
+  "timestamp": "2026-08-08T00:00:00Z",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2026-11940"
+      },
+      "products": [
+        {
+          "@id": "tahr-desk:ci",
+          "subcomponents": [
+            {
+              "@id": "pkg:generic/python@3.14.7"
+            }
+          ]
+        }
+      ],
+      "status": "fixed",
+      "status_notes": "The official CPython v3.14.7 tag contains security backport 79c06bd5c6afa3c440d50faf7ee1b147c8832b4c."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2026-11972"
+      },
+      "products": [
+        {
+          "@id": "tahr-desk:ci",
+          "subcomponents": [
+            {
+              "@id": "pkg:generic/python@3.14.7"
+            }
+          ]
+        }
+      ],
+      "status": "fixed",
+      "status_notes": "The official CPython v3.14.7 tag contains security backport e86666c9dd256d52d0fbef6feb1ea4a51768fdec."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2026-15308"
+      },
+      "products": [
+        {
+          "@id": "tahr-desk:ci",
+          "subcomponents": [
+            {
+              "@id": "pkg:generic/python@3.14.7"
+            }
+          ]
+        }
+      ],
+      "status": "fixed",
+      "status_notes": "The official CPython v3.14.7 tag contains security backport 07efb08123ba9367a7107325adb9d5626dca1ca9."
+    }
+  ]
+}
