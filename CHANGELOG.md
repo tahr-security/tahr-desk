@@ -18,4 +18,4 @@ All notable changes follow semantic versioning.
 - Staff queues, ownership, lifecycle, public/private messages, PDF/CSV exports,
   agent administration, content settings, and optional signed webhooks.
 - Deterministic Pinehaven seed content, hardened containers, PostgreSQL worker,
-  generated client, CI, and Wardenn-compatible administrator bootstrap.
+  generated client, CI, and deployment-compatible administrator bootstrap.

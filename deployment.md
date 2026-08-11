@@ -13,7 +13,7 @@ and API on internal port 8000.
   and `exports/`.
 - PostgreSQL is non-root, digest-pinned, and has no published port.
 - App and worker share no provider credentials.
-- Wardenn sets `WEBHOOK_DELIVERY_ENABLED=false`.
+- Production deployments set `WEBHOOK_DELIVERY_ENABLED=false`.
 
 Validate configuration before starting:
 
@@ -37,7 +37,7 @@ the registry-returned digest.
 
 It does not create the tag or a GitHub release.
 
-## Wardenn evidence and onboarding
+## Release evidence and downstream onboarding
 
 After separately approved publication, bind the source commit, template commit,
 manifest hash, exact app and PostgreSQL digests, `linux/amd64` platform,

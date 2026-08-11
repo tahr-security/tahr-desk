@@ -11,4 +11,4 @@ acknowledge, validate, coordinate remediation, and publish disclosure guidance.
 
 Never commit secrets. Rotate any value suspected of exposure and invalidate
 affected sessions. Provider acceptance testing, publication, package visibility,
-Wardenn catalog changes, and deployment require explicit operator approval.
+deployment-catalog changes, and deployment require explicit operator approval.

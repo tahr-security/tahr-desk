@@ -86,5 +86,5 @@ Credential-based public responses set `Cache-Control: no-store`.
 
 The upload processor, Markdown renderer, exporters, webhook transport, worker,
 tracking policy, and staff policy layer are isolated seams. Any separately
-authorized Wardenn modification must use a new immutable semantic version,
+authorized research modification must use a new immutable semantic version,
 exact digest, classification evidence, and independent review.

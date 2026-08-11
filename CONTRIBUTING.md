@@ -11,7 +11,7 @@ generated-client drift check, and relevant container tests.
 
 Preserve these invariants:
 
-- Wardenn bootstrap routes, variables, JWT bearer auth, and active-superuser check
+- bootstrap routes, variables, JWT bearer auth, and active-superuser check
 - case-first lock order, `If-Match`, atomic event creation, and retry idempotency
 - private-note isolation and reference/email body-only tracking
 - image re-encoding, random storage keys, and bounded uploads

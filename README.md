@@ -46,7 +46,7 @@ Public pages: `/`, `/services`, `/services/:slug`, `/report`, `/track`, and
 `/login`. Staff pages: `/admin`, `/admin/cases`, `/admin/exports`,
 `/admin/account`, plus superuser agent and settings pages.
 
-The Wardenn administrator protocol remains:
+The administrator bootstrap protocol remains:
 
 - `POST /api/v1/login/access-token`
 - `GET /api/v1/users/me`
@@ -70,10 +70,10 @@ routes, query strings, analytics, or application logs.
 
 No workflow creates a tag or GitHub release. Pushing source or tags, approving
 the protected publication environment, publishing an image, changing GHCR
-visibility, using a registry-observed digest in Wardenn, synchronizing the
-catalog, and deploying are separate explicit operator approvals.
+visibility, using a registry-observed digest in an external deployment catalog,
+synchronizing that catalog, and deploying are separate explicit operator approvals.
 
-No Wardenn catalog file is included before a public `linux/amd64` image exists
+No deployment catalog file is included before a public `linux/amd64` image exists
 and its exact registry-observed digest has been independently approved.
 
 ## License

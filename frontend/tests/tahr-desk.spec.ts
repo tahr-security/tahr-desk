@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, type Page, test } from "@playwright/test"
 
-const adminEmail = process.env.FIRST_SUPERUSER ?? "wardenn-admin@tahr.ca"
+const adminEmail = process.env.FIRST_SUPERUSER ?? "demo-admin@tahr.ca"
 const adminPassword = process.env.FIRST_SUPERUSER_PASSWORD
 const pixel = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGN0yqtlYGBgYmBgYGBgAAAOCwExdVg2bgAAAABJRU5ErkJggg==",

@@ -5,7 +5,7 @@
 | `ENVIRONMENT` | yes | no | `local`, `staging`, or `production`; non-local rejects known placeholders. |
 | `PROJECT_NAME` | yes | no | OpenAPI title; Compose defaults to `Tahr Desk`. |
 | `SECRET_KEY` | yes | yes | Independent high-entropy JWT and webhook-key root. |
-| `FIRST_SUPERUSER` | yes | no | Bootstrap email; Wardenn uses `wardenn-admin@tahr.ca`. |
+| `FIRST_SUPERUSER` | yes | no | Bootstrap email; Compose defaults to `demo-admin@tahr.ca`. |
 | `FIRST_SUPERUSER_PASSWORD` | yes | yes | Used only when that user is absent; never rotates it. |
 | `POSTGRES_SERVER` | yes | no | PostgreSQL host; `db` in Compose. |
 | `POSTGRES_PORT` | no | no | Defaults to `5432`. |
@@ -15,7 +15,7 @@
 | `FRONTEND_HOST` | yes | no | Canonical browser origin. |
 | `BACKEND_CORS_ORIGINS` | no | no | Comma-separated or JSON-list allowed origins. |
 | `DATA_ROOT` | no | no | `/app/data` in containers. |
-| `WEBHOOK_DELIVERY_ENABLED` | no | no | `false`; Wardenn must keep it false. |
+| `WEBHOOK_DELIVERY_ENABLED` | no | no | `false`; production deployments should keep it false. |
 | `WEBHOOK_ALLOW_HTTP` | no | no | `false`; only a local webhook harness may opt in. |
 | `WORKER_POLL_SECONDS` | no | no | Worker idle poll interval; defaults to `1`. |
 | `TAHR_DESK_IMAGE` | yes | no | Local tag for development; exact `@sha256:` for release/deployment. |

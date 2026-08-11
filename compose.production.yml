@@ -6,7 +6,7 @@ x-application-environment: &application-environment
   FRONTEND_HOST: ${FRONTEND_HOST:-http://localhost:8000}
   BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:8000}
   SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
-  FIRST_SUPERUSER: ${FIRST_SUPERUSER:-wardenn-admin@tahr.ca}
+  FIRST_SUPERUSER: ${FIRST_SUPERUSER:-demo-admin@tahr.ca}
   FIRST_SUPERUSER_PASSWORD: ${FIRST_SUPERUSER_PASSWORD:?Set FIRST_SUPERUSER_PASSWORD in .env}
   POSTGRES_SERVER: db
   POSTGRES_PORT: "5432"
